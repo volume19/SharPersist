@@ -20,11 +20,18 @@ fn main() {
             {
                 let result = match config.technique {
                     Technique::Registry => techniques::registry::execute(&config),
-                    _ => {
-                        println!("\n[!] Technique not yet implemented - placeholder only");
+                    Technique::Service => techniques::service::execute(&config),
+                    Technique::KeePass => techniques::keepass::execute(&config),
+                    Technique::StartupFolder => techniques::startup_folder::execute(&config),
+                    Technique::TortoiseSVN => techniques::tortoisesvn::execute(&config),
+                    Technique::SchTask | Technique::SchTaskBackdoor => {
+                        println!("\n[!] Scheduled Task techniques require COM interop");
                         eprintln!(
-                            "[-] ERROR: Technique '{}' is not yet implemented",
+                            "[-] ERROR: Technique '{}' is not yet implemented in Rust port",
                             config.technique
+                        );
+                        eprintln!(
+                            "[*] INFO: This technique requires complex COM automation which is planned for future implementation"
                         );
                         std::process::exit(1);
                     }

@@ -24,6 +24,14 @@ pub enum PersistError {
     #[error("Missing required argument: {0}")]
     MissingArgument(String),
 
+    /// Required parameter missing
+    #[error("Missing required parameter: {0}")]
+    MissingParameter(String),
+
+    /// Invalid input provided
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+
     /// Platform not supported for this operation
     #[error("Platform not supported: {technique} is only available on {platform}")]
     PlatformNotSupported { technique: String, platform: String },
@@ -51,6 +59,14 @@ pub enum PersistError {
     /// Resource not found
     #[error("Resource not found: {0}")]
     NotFound(String),
+
+    /// Operation failed
+    #[error("Operation failed: {0}")]
+    OperationFailed(String),
+
+    /// Windows API error
+    #[error("Windows API error: {0}")]
+    WindowsApi(String),
 
     /// Generic error with message
     #[error("{0}")]

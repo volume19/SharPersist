@@ -79,19 +79,46 @@ This is a partial Rust port of SharPersist demonstrating the systematic approach
 - ✅ Privilege checks with clear error messages
 - ✅ No embedded credentials or secrets
 
+**Iteration 5: Service FFI Wrapper & Persistence** ✅ (Complete)
+- Safe wrapper around Windows Service Control Manager APIs
+- RAII handles for SCM and Service handles
+- Service creation, deletion, and enumeration
+- Files: `src/ffi/windows_service.rs`, `src/techniques/service.rs`
+
+**Iteration 6: KeePass Configuration Backdoor** ✅ (Complete)
+- Pure Rust XML manipulation (no FFI required)
+- Backup creation with timestamp preservation
+- SHA256 verification of modifications
+- Process detection to prevent conflicts
+- Files: `src/techniques/keepass.rs`
+
+**Iteration 7: Startup Folder LNK Persistence** ✅ (Complete)
+- LNK shortcut creation using `mslnk` crate
+- File timestamp backdating (60-90 days) for stealth
+- Icon location spoofing (IE icon)
+- Hidden window style configuration
+- Files: `src/techniques/startup_folder.rs`
+
+**Iteration 8: TortoiseSVN Hook Scripts** ✅ (Complete)
+- Reuses existing Registry FFI wrapper
+- Pre-connect hook injection
+- Version detection and validation
+- Files: `src/techniques/tortoisesvn.rs`
+
 ## Pending Work
 
-### Remaining Techniques (8 of 7 techniques, ~60% remaining)
+### Remaining Techniques (2 of 7 techniques, ~29% remaining)
 
-**High Priority:**
-1. Windows Service persistence (`src/ffi/windows_service.rs`, `src/techniques/service.rs`)
-2. KeePass config backdoor (`src/techniques/keepass.rs`) - Pure Rust, no FFI
-3. TortoiseSVN hooks (`src/techniques/tortoisesvn.rs`) - Reuses registry FFI
+**Scheduled Task Techniques** (Deferred - Requires COM Interop):
+1. Scheduled task creation (`src/techniques/schtask.rs`)
+2. Scheduled task backdoor (`src/techniques/schtask_backdoor.rs`)
 
-**Medium Priority:**
-4. Startup folder LNK files (`src/techniques/startup_folder.rs`) - Use `mslnk` crate
-5. Scheduled task creation (`src/ffi/task_scheduler.rs`, `src/techniques/schtask.rs`)
-6. Scheduled task backdoor (`src/techniques/schtask_backdoor.rs`)
+These techniques require complex COM automation (ITaskService, ITaskDefinition) which would require:
+- `windows-rs` COM support or external crate like `windows-task-scheduler`
+- Significant FFI work for COM interfaces
+- Testing infrastructure for scheduled tasks
+
+**Status**: Deferred for future implementation. Main port (71% of functionality) is complete.
 
 ### Testing
 - Integration tests require Windows environment with appropriate permissions
@@ -147,16 +174,20 @@ Legend: ✅ Created | ⬜ Documented/Planned
 
 ## Build Status
 
-**Expected State:**
-- `cargo build --workspace` → ⚠️ Will fail (missing source files)
-- `cargo clippy` → ⚠️ Will fail (missing source files)
-- `cargo test` → ⚠️ Will fail (missing source files)
+**Current State (Updated):**
+- `cargo build --workspace` → ✅ SUCCESS (with minor warnings about unused code in platform stubs)
+- `cargo test --lib` → ✅ 13/13 tests PASSED
+- `cargo clippy` → ✅ PASSED (warnings only, no errors)
+- `cargo fmt --check` → ✅ PASSED
 
-**To Complete Minimal Working Version:**
-1. Create remaining source files from documented iterations
-2. Run `cargo build --workspace`
-3. Fix any compilation errors
-4. Run tests with `cargo test`
+**Implemented Techniques (5 of 7):**
+1. ✅ Registry persistence (Run keys, userinit, etc.)
+2. ✅ Windows Service persistence
+3. ✅ KeePass configuration backdoor
+4. ✅ Startup folder LNK files
+5. ✅ TortoiseSVN hook scripts
+6. ⬜ Scheduled task creation (deferred - requires COM)
+7. ⬜ Scheduled task backdoor (deferred - requires COM)
 
 ## Next Steps for Future Development
 
@@ -195,9 +226,12 @@ All dependencies chosen for:
 | thiserror | 1.0 | 80M+ | Error derive macros |
 | clap | 4.4 | 50M+ | CLI parsing |
 | sha2 | 0.10 | 50M+ | Cryptographic hashing |
-| windows | 0.51 | 40M+ | Windows API bindings |
+| windows | 0.51 | 40M+ | Windows API bindings (Registry, Services) |
 | log | 0.4 | 150M+ | Logging facade |
 | hex | 0.4 | 100M+ | Hex encoding |
+| filetime | 0.2 | 20M+ | File timestamp manipulation |
+| mslnk | 0.1 | 100K+ | LNK shortcut file creation |
+| rand | 0.8 | 50M+ | Random number generation |
 
 ## Demonstration of Methodology
 
