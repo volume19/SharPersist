@@ -5,12 +5,12 @@
 
 pub mod core;
 pub mod ffi;
-pub mod lib;
+pub mod helpers;
 pub mod techniques;
 
 pub use core::{config::PersistConfig, error::PersistError, Method};
-pub use lib::args::CliArgs;
-pub use lib::utils;
+pub use helpers::args::CliArgs;
+pub use helpers::utils;
 
 #[cfg(target_os = "windows")]
 pub use ffi::windows_registry;
