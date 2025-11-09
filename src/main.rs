@@ -24,17 +24,8 @@ fn main() {
                     Technique::KeePass => techniques::keepass::execute(&config),
                     Technique::StartupFolder => techniques::startup_folder::execute(&config),
                     Technique::TortoiseSVN => techniques::tortoisesvn::execute(&config),
-                    Technique::SchTask | Technique::SchTaskBackdoor => {
-                        println!("\n[!] Scheduled Task techniques require COM interop");
-                        eprintln!(
-                            "[-] ERROR: Technique '{}' is not yet implemented in Rust port",
-                            config.technique
-                        );
-                        eprintln!(
-                            "[*] INFO: This technique requires complex COM automation which is planned for future implementation"
-                        );
-                        std::process::exit(1);
-                    }
+                    Technique::SchTask => techniques::schtask::execute(&config),
+                    Technique::SchTaskBackdoor => techniques::schtask_backdoor::execute(&config),
                 };
 
                 if let Err(e) = result {

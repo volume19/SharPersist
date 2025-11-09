@@ -7,5 +7,7 @@ pub mod registry;
 pub mod service;
 
 pub mod keepass;
+pub mod schtask;
+pub mod schtask_backdoor;
 pub mod startup_folder;
 pub mod tortoisesvn;
