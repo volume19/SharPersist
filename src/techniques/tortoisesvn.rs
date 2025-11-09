@@ -12,8 +12,12 @@ use crate::core::error::{PersistError, Result};
 #[cfg(target_os = "windows")]
 use crate::ffi::windows_registry::{Hive, RegKey, RegValueKind};
 
+// Constants are used in Windows-specific code paths
+#[allow(dead_code)]
 const TORTOISESVN_KEY: &str = r"Software\TortoiseSVN";
+#[allow(dead_code)]
 const HOOKS_VALUE: &str = "hooks";
+#[allow(dead_code)]
 const VERSION_VALUE: &str = "CurrentVersion";
 
 /// Execute TortoiseSVN persistence operation based on configuration
@@ -236,11 +240,13 @@ fn list_persistence() -> Result<()> {
 
 /// Result of a check operation
 #[derive(Debug)]
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
 struct CheckResult {
     successes: Vec<String>,
     errors: Vec<String>,
 }
 
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
 impl CheckResult {
     fn new() -> Self {
         Self {
@@ -277,7 +283,7 @@ mod tests {
     fn test_check_requires_command() {
         use crate::core::config::{Method, Technique};
 
-        let config = PersistConfig {
+        let _config = PersistConfig {
             technique: Technique::TortoiseSVN,
             method: Method::Check,
             command: None,

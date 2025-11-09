@@ -57,7 +57,7 @@ fn add_persistence(config: &PersistConfig) -> Result<()> {
     };
 
     // Parse trigger type
-    let trigger_type = windows_task::TriggerType::from_str(trigger_option)?;
+    let trigger_type: windows_task::TriggerType = trigger_option.parse()?;
 
     // Create the scheduled task
     windows_task::create_task(task_name, &full_command, trigger_type)?;

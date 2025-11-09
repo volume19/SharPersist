@@ -4,6 +4,8 @@
 // Provides functionality for creating, modifying, and querying scheduled tasks.
 
 use crate::core::error::{PersistError, Result};
+
+#[cfg(target_os = "windows")]
 use std::process::Command;
 
 /// Represents a scheduled task trigger type
@@ -14,8 +16,10 @@ pub enum TriggerType {
     Logon,
 }
 
-impl TriggerType {
-    pub fn from_str(s: &str) -> Result<Self> {
+impl std::str::FromStr for TriggerType {
+    type Err = PersistError;
+
+    fn from_str(s: &str) -> Result<Self> {
         match s.to_lowercase().as_str() {
             "daily" => Ok(TriggerType::Daily),
             "hourly" => Ok(TriggerType::Hourly),
@@ -44,6 +48,12 @@ pub fn task_exists(task_name: &str) -> bool {
             return output.status.success();
         }
     }
+
+    #[cfg(not(target_os = "windows"))]
+    {
+        let _ = task_name; // Suppress unused variable warning
+    }
+
     false
 }
 
@@ -267,10 +277,10 @@ mod tests {
 
     #[test]
     fn test_trigger_type_from_str() {
-        assert!(TriggerType::from_str("daily").is_ok());
-        assert!(TriggerType::from_str("hourly").is_ok());
-        assert!(TriggerType::from_str("logon").is_ok());
-        assert!(TriggerType::from_str("invalid").is_err());
+        assert!("daily".parse::<TriggerType>().is_ok());
+        assert!("hourly".parse::<TriggerType>().is_ok());
+        assert!("logon".parse::<TriggerType>().is_ok());
+        assert!("invalid".parse::<TriggerType>().is_err());
     }
 
     #[test]

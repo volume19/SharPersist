@@ -24,30 +24,30 @@ pub fn execute(config: &PersistConfig) -> Result<()> {
 }
 
 /// Get the startup folder path
+#[cfg(target_os = "windows")]
 fn get_startup_folder() -> Result<PathBuf> {
-    #[cfg(target_os = "windows")]
-    {
-        use std::env;
+    use std::env;
 
-        let appdata = env::var("APPDATA").map_err(|_| {
-            PersistError::OperationFailed("Failed to get APPDATA environment variable".to_string())
-        })?;
+    let appdata = env::var("APPDATA").map_err(|_| {
+        PersistError::OperationFailed("Failed to get APPDATA environment variable".to_string())
+    })?;
 
-        Ok(PathBuf::from(appdata)
-            .join("Microsoft")
-            .join("Windows")
-            .join("Start Menu")
-            .join("Programs")
-            .join("Startup"))
-    }
+    Ok(PathBuf::from(appdata)
+        .join("Microsoft")
+        .join("Windows")
+        .join("Start Menu")
+        .join("Programs")
+        .join("Startup"))
+}
 
-    #[cfg(not(target_os = "windows"))]
-    {
-        Err(PersistError::PlatformNotSupported {
-            technique: "StartupFolder".to_string(),
-            platform: "Windows".to_string(),
-        })
-    }
+/// Get the startup folder path (non-Windows stub)
+#[cfg(not(target_os = "windows"))]
+#[allow(dead_code)] // Only used in tests on non-Windows platforms
+fn get_startup_folder() -> Result<PathBuf> {
+    Err(PersistError::PlatformNotSupported {
+        technique: "StartupFolder".to_string(),
+        platform: "Windows".to_string(),
+    })
 }
 
 /// Add startup folder persistence via LNK file
@@ -303,11 +303,13 @@ fn list_persistence() -> Result<()> {
 
 /// Result of a check operation
 #[derive(Debug)]
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
 struct CheckResult {
     successes: Vec<String>,
     errors: Vec<String>,
 }
 
+#[cfg_attr(not(target_os = "windows"), allow(dead_code))]
 impl CheckResult {
     fn new() -> Self {
         Self {
